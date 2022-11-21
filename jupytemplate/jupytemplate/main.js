@@ -6,18 +6,9 @@ define(['require', 'jquery', 'base/js/namespace', 'base/js/events'],
 
         // define default values for config parameters
         let params = {
+            template_file_name: "template.ipynb",
             insert_template_on_creation: true,
             ask_title_change_if_untitled: true
-        };
-
-        const add_sections = function () {
-            const template_path = Jupyter.notebook.base_url + 'nbextensions/jupytemplate/template.ipynb';
-            $.getJSON(template_path, json => {
-                let cells = json['cells'];
-                cells.forEach((item, index) => {
-                    Jupyter.notebook.insert_cell_at_index(item['cell_type'], index).set_text(item['source'].join(''));
-                });
-            });
         };
 
         // Prompts user to enter name for notebook
@@ -26,17 +17,6 @@ define(['require', 'jquery', 'base/js/namespace', 'base/js/events'],
             if (Jupyter.notebook.notebook_name.includes('Untitled')) {
                 document.getElementsByClassName('filename')[0].click();
             }
-        };
-
-        // define action, register with ActionHandler instance
-        const prefix = 'auto';
-        const action_name = 'inset-template-cells';
-        const action = {
-            icon: 'fa-file-text-o',
-            help: 'Insert template cells at the beginning of the notebook',
-            help_index: 'zz',
-            id: 'insert_template_cells',
-            handler: add_sections
         };
 
         const initialize = function () {
@@ -53,6 +33,16 @@ define(['require', 'jquery', 'base/js/namespace', 'base/js/events'],
                     href: require.toUrl('./template.css')
                 })
                 .appendTo('head');
+
+            const add_sections = function () {
+                const template_path = Jupyter.notebook.base_url + 'nbextensions/jupytemplate/' + params.template_file_name;
+                $.getJSON(template_path, json => {
+                    let cells = json['cells'];
+                    cells.forEach((item, index) => {
+                        Jupyter.notebook.insert_cell_at_index(item['cell_type'], index).set_text(item['source'].join(''));
+                    });
+                });
+            };
 
             // Add sections to the notebook and run all
             if (Jupyter.notebook.ncells() === 1 && params.insert_template_on_creation) {
@@ -75,6 +65,17 @@ define(['require', 'jquery', 'base/js/namespace', 'base/js/events'],
                 // Run when notebook is saved
                 JupyterEvents.on('before_save.Notebook', prompt_name);
             }
+
+            // define action, register with ActionHandler instance
+            const prefix = 'auto';
+            const action_name = 'inset-template-cells';
+            const action = {
+                icon: 'fa-file-text-o',
+                help: 'Insert template cells at the beginning of the notebook',
+                help_index: 'zz',
+                id: 'insert_template_cells',
+                handler: add_sections
+            };
 
             // register actions with ActionHandler instance
             let action_full_name = Jupyter.keyboard_manager.actions.register(action, action_name, prefix);

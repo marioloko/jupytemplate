@@ -24,3 +24,10 @@ def get_template_path():
     :return: the path if the template notebook
     """
     return os.path.abspath(os.path.join(os.path.dirname(__file__), 'jupytemplate', 'template.ipynb'))
+
+def get_template_dir_path():
+    """
+    Get absolute path of directory where template files are stored notebook.
+    :return: the path if the template notebook
+    """
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), 'jupytemplate'))
